@@ -1,6 +1,6 @@
 // === CONSTANTES DEL JUEGO ===
 
-// Tokens disponibles (6 en total)
+// Tokens disponibles - AGREGADAS 2 NUEVAS FICHAS
 const TOKENS = [
     { id: 'hat', color: '#e74c3c', symbol: '🎩', name: 'Sombrero' },
     { id: 'car', color: '#3498db', symbol: '🚗', name: 'Coche' },
@@ -24,7 +24,7 @@ const BOT_NAMES = [
 // Configuración por defecto
 const DEFAULT_CONFIG = {
     startingMoney: 1500,
-    maxPlayers: 6,
+    maxPlayers: 6, // Cambiado a 6 por las nuevas fichas
     minPlayers: 2,
     jailPosition: 10,
     goPosition: 0,
