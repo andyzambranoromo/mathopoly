@@ -1,4 +1,4 @@
-/* === RESET Y VARIABLES === */
+* === RESET Y VARIABLES === */
 * {
     margin: 0;
     padding: 0;
@@ -293,6 +293,19 @@ body {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+}
+
+/* Modal sizes */
+.modal-lg {
+    max-width: 600px;
+    width: 90%;
+}
+
+.modal-xl {
+    max-width: 95vw;
+    max-height: 95vh;
+    width: 95vw;
+    height: 95vh;
 }
 
 /* Scrollbar personalizado */
