@@ -3,7 +3,7 @@
 class LobbyManager {
     constructor() {
         this.selectedMode = 'local';
-        this.playerCount = 2;
+        this.playerCount = 2; // Comienza con 2 jugadores
         this.players = [];
         this.selectedTokens = new Set();
     }
@@ -112,16 +112,16 @@ class LobbyManager {
     renderPlayerInputs() {
         let html = '';
         
-        // Reiniciar tokens seleccionados
-        this.selectedTokens.clear();
+        // Obtener tokens ya seleccionados
+        const usedTokens = new Set();
         
         for (let i = 0; i < this.playerCount; i++) {
-            // Encontrar token disponible
+            // Encontrar token disponible (incremental)
             let availableToken = null;
             for (const token of CONSTANTS.TOKENS) {
-                if (!this.selectedTokens.has(token.id)) {
+                if (!usedTokens.has(token.id)) {
                     availableToken = token;
-                    this.selectedTokens.add(token.id);
+                    usedTokens.add(token.id);
                     break;
                 }
             }
@@ -131,18 +131,29 @@ class LobbyManager {
                 availableToken = CONSTANTS.TOKENS[0];
             }
             
+            this.selectedTokens.add(availableToken.id);
+            
             html += `
                 <div class="player-input-row" data-index="${i}">
+                    <div class="player-input-header">
+                        <span class="player-label">Jugador ${i + 1}</span>
+                        ${i >= CONSTANTS.DEFAULT_CONFIG.minPlayers ? `
+                            <button class="btn btn-danger btn-sm remove-player" data-index="${i}">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        ` : ''}
+                    </div>
+                    
                     <input type="text" 
                            class="player-name-input" 
-                           placeholder="Jugador ${i + 1}"
+                           placeholder="Nombre del jugador"
                            value="${i === 0 ? 'Jugador 1' : i === 1 ? 'Jugador 2' : ''}"
                            maxlength="15">
                     
                     <div class="token-selection">
                         ${CONSTANTS.TOKENS.map(t => {
                             const isSelected = t.id === availableToken.id;
-                            const isUsed = this.isTokenUsed(t.id, i);
+                            const isUsed = usedTokens.has(t.id) && !isSelected;
                             return `
                                 <div class="token-option ${isSelected ? 'selected' : ''} ${isUsed ? 'used' : ''}" 
                                      data-token="${t.id}"
@@ -151,36 +162,15 @@ class LobbyManager {
                                      style="background-color: ${t.color}"
                                      ${isUsed ? 'title="Token ya utilizado"' : ''}>
                                     ${t.symbol}
+                                    ${isUsed ? '<div class="token-used">✗</div>' : ''}
                                 </div>
                             `;
                         }).join('')}
                     </div>
-                    
-                    ${i >= CONSTANTS.DEFAULT_CONFIG.minPlayers ? `
-                        <button class="btn btn-danger btn-sm remove-player" data-index="${i}">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    ` : ''}
                 </div>
             `;
         }
         return html;
-    }
-
-    // Verificar si un token está usado por otro jugador
-    isTokenUsed(tokenId, currentIndex) {
-        // Para saber si está usado, necesitamos ver los tokens seleccionados en otras filas
-        const allTokenOptions = document.querySelectorAll('.token-option.selected');
-        for (const option of allTokenOptions) {
-            const row = option.closest('.player-input-row');
-            if (row) {
-                const index = parseInt(row.dataset.index);
-                if (index !== currentIndex && option.dataset.token === tokenId) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     // Configurar event listeners
@@ -198,22 +188,34 @@ class LobbyManager {
             if (tokenOption && !tokenOption.classList.contains('used')) {
                 const row = tokenOption.closest('.player-input-row');
                 const index = parseInt(row.dataset.index);
+                const tokenId = tokenOption.dataset.token;
                 
-                // Guardar el token actual seleccionado
-                const currentToken = tokenOption.dataset.token;
+                // Verificar si el token ya está siendo usado por otro jugador
+                let isTokenUsedByOther = false;
+                const allRows = document.querySelectorAll('.player-input-row');
                 
-                // Deseleccionar todos los tokens en esta fila
-                const allTokensInRow = row.querySelectorAll('.token-option');
-                allTokensInRow.forEach(t => t.classList.remove('selected'));
+                allRows.forEach((otherRow, otherIndex) => {
+                    if (otherIndex !== index) {
+                        const selectedToken = otherRow.querySelector('.token-option.selected');
+                        if (selectedToken && selectedToken.dataset.token === tokenId) {
+                            isTokenUsedByOther = true;
+                        }
+                    }
+                });
                 
-                // Seleccionar el nuevo token
+                if (isTokenUsedByOther) {
+                    alert('Esta ficha ya está siendo utilizada por otro jugador');
+                    return;
+                }
+                
+                const oldToken = row.querySelector('.token-option.selected');
+                if (oldToken) {
+                    oldToken.classList.remove('selected');
+                    this.selectedTokens.delete(oldToken.dataset.token);
+                }
+                
                 tokenOption.classList.add('selected');
-                
-                // Actualizar la lista de tokens seleccionados
-                this.updateSelectedTokens();
-                
-                // Forzar re-render para actualizar los estados "used"
-                this.updateTokenStates();
+                this.selectedTokens.add(tokenOption.dataset.token);
             }
 
             // Eliminar jugador
@@ -236,41 +238,6 @@ class LobbyManager {
             // Iniciar juego
             if (e.target.id === 'start-game' || e.target.closest('#start-game')) {
                 this.startGame();
-            }
-        });
-
-        // Input de nombres
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('player-name-input')) {
-                this.updatePlayerCount();
-            }
-        });
-    }
-
-    // Actualizar lista de tokens seleccionados
-    updateSelectedTokens() {
-        this.selectedTokens.clear();
-        const selectedOptions = document.querySelectorAll('.token-option.selected');
-        selectedOptions.forEach(option => {
-            this.selectedTokens.add(option.dataset.token);
-        });
-    }
-
-    // Actualizar estados de tokens
-    updateTokenStates() {
-        const allTokenOptions = document.querySelectorAll('.token-option');
-        const selectedTokens = Array.from(document.querySelectorAll('.token-option.selected'))
-            .map(opt => opt.dataset.token);
-        
-        allTokenOptions.forEach(option => {
-            const tokenId = option.dataset.token;
-            const isSelected = option.classList.contains('selected');
-            
-            // Si el token está seleccionado en otra fila y no es el actual, marcarlo como usado
-            if (selectedTokens.includes(tokenId) && !isSelected) {
-                option.classList.add('used');
-            } else {
-                option.classList.remove('used');
             }
         });
     }
@@ -374,7 +341,7 @@ class LobbyManager {
             const tokenOption = row.querySelector('.token-option.selected');
             
             if (!nameInput || !tokenOption) {
-                alert('Todos los jugadores deben seleccionar un token');
+                alert('Todos los jugadores deben tener un nombre y una ficha seleccionada');
                 return;
             }
             
