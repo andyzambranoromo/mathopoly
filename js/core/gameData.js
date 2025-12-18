@@ -1,6 +1,6 @@
 // === DATOS DEL JUEGO SIMPLIFICADOS ===
 
-// Problemas matemáticos
+// Problemas matemáticos CORREGIDOS
 const MATH_PROBLEMS = [
     // Sumas
     { question: "8 + 5", answer: 13, wrong: [11, 14, 12] },
@@ -29,9 +29,16 @@ const MATH_PROBLEMS = [
     { question: "18 ÷ 3", answer: 6, wrong: [5, 7, 4] },
     { question: "28 ÷ 4", answer: 7, wrong: [6, 8, 5] },
     
-    // Mixtas
+    // Mixtas simples
     { question: "3 + 4 × 2", answer: 11, wrong: [14, 10, 9] },
-    { question: "(5 + 3) × 2", answer: 16, wrong: [13, 11, 10] }
+    { question: "(5 + 3) × 2", answer: 16, wrong: [13, 11, 10] },
+    
+    // Nuevos problemas
+    { question: "7 + 8", answer: 15, wrong: [13, 16, 14] },
+    { question: "25 - 13", answer: 12, wrong: [11, 13, 10] },
+    { question: "6 × 6", answer: 36, wrong: [30, 32, 38] },
+    { question: "48 ÷ 8", answer: 6, wrong: [5, 7, 8] },
+    { question: "9 + 7 - 3", answer: 13, wrong: [15, 11, 12] }
 ];
 
 // Propiedades del tablero
