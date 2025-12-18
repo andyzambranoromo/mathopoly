@@ -24,7 +24,7 @@ class GameLogic {
         return this.currentProblem;
     }
 
-    // Lanzar dados
+    // Lanzar dados con animación mejorada
     rollDice() {
         if (this.gameState.gameFinished || this.gameState.currentPlayerIndex === null) {
             return null;
