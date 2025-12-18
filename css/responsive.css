@@ -1,0 +1,267 @@
+/* === RESPONSIVE DESIGN === */
+
+/* Tablets y laptops pequeños */
+@media (max-width: 1200px) {
+    .game-main {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .players-panel,
+    .game-log-panel {
+        width: 100%;
+        max-height: 300px;
+    }
+    
+    .board-wrapper {
+        max-width: 700px;
+        max-height: 700px;
+    }
+    
+    .mode-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tablets */
+@media (max-width: 992px) {
+    .lobby-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .lobby-main {
+        padding: 20px;
+    }
+    
+    .game-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .game-controls {
+        justify-content: center;
+    }
+    
+    .board-center {
+        width: 50%;
+        height: 50%;
+    }
+    
+    .dice {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .card-pile {
+        width: 70px;
+        height: 90px;
+    }
+    
+    .podium-container {
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        gap: 20px;
+    }
+    
+    .podium-place {
+        width: 80%;
+        height: auto;
+        border-radius: 15px;
+        padding: 20px;
+    }
+    
+    .place-number {
+        position: static;
+        margin-bottom: 15px;
+    }
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+    .logo-main {
+        font-size: 2.2rem;
+    }
+    
+    .mode-title {
+        font-size: 1.5rem;
+    }
+    
+    .player-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .online-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .game-main {
+        padding: 10px;
+    }
+    
+    .board {
+        border-width: 5px;
+    }
+    
+    .cell {
+        padding: 3px;
+    }
+    
+    .property-name {
+        font-size: 0.7rem;
+        padding: 1px 2px;
+    }
+    
+    .property-price {
+        font-size: 0.65rem;
+        padding: 1px 3px;
+    }
+    
+    .cell.corner {
+        font-size: 0.8rem;
+        padding: 5px;
+    }
+    
+    .cell.chance, .cell.community {
+        font-size: 0.8rem;
+    }
+    
+    .board-center {
+        width: 60%;
+        height: 40%;
+    }
+    
+    .dice-area {
+        padding: 15px;
+    }
+    
+    .dice-container {
+        gap: 10px;
+    }
+    
+    .dice {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .card-piles {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .card-pile {
+        width: 60px;
+        height: 80px;
+    }
+    
+    .game-controls-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .results-container {
+        padding: 20px;
+    }
+    
+    .results-header .logo {
+        font-size: 2.5rem;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .lobby-header {
+        padding: 15px;
+    }
+    
+    .lobby-main {
+        padding: 15px;
+    }
+    
+    .mode-card {
+        padding: 20px;
+    }
+    
+    .player-setup {
+        padding: 20px;
+    }
+    
+    .game-header {
+        padding: 10px;
+    }
+    
+    .board-wrapper {
+        max-width: 100%;
+        max-height: 500px;
+    }
+    
+    .board-center {
+        width: 70%;
+        height: 35%;
+    }
+    
+    .property-name {
+        font-size: 0.65rem;
+    }
+    
+    .cell-icon {
+        font-size: 1rem;
+    }
+    
+    .lobby-actions {
+        flex-direction: column;
+    }
+    
+    .results-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .results-actions .btn {
+        width: 100%;
+    }
+}
+
+/* Modo paisaje en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+    .lobby-header {
+        padding: 10px 20px;
+    }
+    
+    .lobby-main {
+        padding: 20px;
+    }
+    
+    .game-main {
+        min-height: auto;
+    }
+    
+    .players-panel,
+    .game-log-panel {
+        max-height: 250px;
+    }
+    
+    .board-wrapper {
+        max-height: 400px;
+    }
+}
+
+/* Pantallas muy grandes */
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    .board-wrapper {
+        max-width: 900px;
+        max-height: 900px;
+    }
+    
+    .property-name {
+        font-size: 0.9rem;
+    }
+}
