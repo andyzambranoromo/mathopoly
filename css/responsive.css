@@ -3,14 +3,7 @@
 /* Tablets y laptops pequeños */
 @media (max-width: 1200px) {
     .game-main {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .players-panel,
-    .game-log-panel {
-        width: 100%;
-        max-height: 300px;
+        grid-template-columns: 250px 1fr 300px;
     }
     
     .board-wrapper {
@@ -35,17 +28,19 @@
         padding: 20px;
     }
     
-    .game-header {
-        flex-direction: column;
-        text-align: center;
+    .game-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
     }
     
-    .game-controls {
-        justify-content: center;
+    .players-panel,
+    .game-log-panel {
+        max-height: 300px;
     }
     
     .board-center {
-        width: 50%;
+        width: 60%;
         height: 50%;
     }
     
@@ -53,11 +48,6 @@
         width: 50px;
         height: 50px;
         font-size: 1.5rem;
-    }
-    
-    .card-pile {
-        width: 70px;
-        height: 90px;
     }
     
     .podium-container {
@@ -90,16 +80,13 @@
         font-size: 1.5rem;
     }
     
-    .player-inputs {
-        grid-template-columns: 1fr;
-    }
-    
     .online-options {
         grid-template-columns: 1fr;
     }
     
     .game-main {
         padding: 10px;
+        gap: 10px;
     }
     
     .board {
@@ -111,13 +98,11 @@
     }
     
     .property-name {
-        font-size: 0.7rem;
-        padding: 1px 2px;
+        font-size: 0.65rem;
     }
     
     .property-price {
-        font-size: 0.65rem;
-        padding: 1px 3px;
+        font-size: 0.6rem;
     }
     
     .cell.corner {
@@ -130,7 +115,7 @@
     }
     
     .board-center {
-        width: 60%;
+        width: 70%;
         height: 40%;
     }
     
@@ -146,16 +131,6 @@
         width: 40px;
         height: 40px;
         font-size: 1.2rem;
-    }
-    
-    .card-piles {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .card-pile {
-        width: 60px;
-        height: 80px;
     }
     
     .game-controls-bottom {
@@ -200,12 +175,12 @@
     }
     
     .board-center {
-        width: 70%;
+        width: 80%;
         height: 35%;
     }
     
     .property-name {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
     }
     
     .cell-icon {
