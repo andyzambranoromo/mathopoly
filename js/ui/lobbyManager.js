@@ -3,10 +3,9 @@
 class LobbyManager {
     constructor() {
         this.selectedMode = 'local';
-        this.playerCount = 1; // Cambiado: comienza con 1 jugador
+        this.playerCount = 2;
         this.players = [];
         this.selectedTokens = new Set();
-        this.availableTokens = new Set(CONSTANTS.TOKENS.map(t => t.id));
     }
 
     // Inicializar lobby
@@ -30,7 +29,7 @@ class LobbyManager {
                     </div>
                     <div class="player-count-display">
                         <i class="fas fa-users"></i>
-                        <span>Jugadores: <span id="player-count">${this.playerCount}</span>/4</span>
+                        <span>Jugadores: <span id="player-count">${this.playerCount}</span>/6</span>
                     </div>
                 </header>
 
@@ -88,28 +87,17 @@ class LobbyManager {
     renderLocalConfig() {
         return `
             <div class="player-setup">
-                <h3>Configuración de Jugadores</h3>
+                <h3>Configuración de Jugadores (2-6 jugadores)</h3>
                 
-                <div class="player-count-controls">
-                    <div class="form-group">
-                        <label>Número de Jugadores (2-4):</label>
-                        <div class="count-buttons">
-                            ${[2, 3, 4].map(count => `
-                                <button class="count-btn ${count === this.playerCount ? 'active' : ''}" 
-                                        data-count="${count}">
-                                    ${count}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-
                 <div id="player-inputs" class="player-inputs">
                     ${this.renderPlayerInputs()}
                 </div>
 
                 <div class="lobby-actions">
-                    <button id="add-bot" class="btn btn-warning" ${this.playerCount >= 4 ? 'disabled' : ''}>
+                    <button id="add-player" class="btn btn-primary" ${this.playerCount >= 6 ? 'disabled' : ''}>
+                        <i class="fas fa-user-plus"></i> Agregar Jugador
+                    </button>
+                    <button id="add-bot" class="btn btn-warning" ${this.playerCount >= 6 ? 'disabled' : ''}>
                         <i class="fas fa-robot"></i> Agregar Bot
                     </button>
                     <button id="start-game" class="btn btn-success start-btn">
@@ -120,41 +108,20 @@ class LobbyManager {
         `;
     }
 
-    // Renderizar configuración online
-    renderOnlineConfig() {
-        return `
-            <div class="online-setup">
-                <h3>Juego Online</h3>
-                <div class="online-options">
-                    <div class="online-option" id="create-room">
-                        <i class="fas fa-plus-circle"></i>
-                        <h4>Crear Sala</h4>
-                        <p>Crea una nueva sala y comparte el código</p>
-                    </div>
-                    <div class="online-option" id="join-room">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <h4>Unirse a Sala</h4>
-                        <p>Ingresa el código de una sala existente</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
     // Renderizar inputs de jugadores
     renderPlayerInputs() {
         let html = '';
         
-        // Obtener tokens ya seleccionados
-        const usedTokens = new Set();
+        // Reiniciar tokens seleccionados
+        this.selectedTokens.clear();
         
         for (let i = 0; i < this.playerCount; i++) {
             // Encontrar token disponible
             let availableToken = null;
             for (const token of CONSTANTS.TOKENS) {
-                if (!usedTokens.has(token.id)) {
+                if (!this.selectedTokens.has(token.id)) {
                     availableToken = token;
-                    usedTokens.add(token.id);
+                    this.selectedTokens.add(token.id);
                     break;
                 }
             }
@@ -164,20 +131,18 @@ class LobbyManager {
                 availableToken = CONSTANTS.TOKENS[0];
             }
             
-            this.selectedTokens.add(availableToken.id);
-            
             html += `
                 <div class="player-input-row" data-index="${i}">
                     <input type="text" 
                            class="player-name-input" 
                            placeholder="Jugador ${i + 1}"
-                           value="${i === 0 ? 'Jugador 1' : ''}"
+                           value="${i === 0 ? 'Jugador 1' : i === 1 ? 'Jugador 2' : ''}"
                            maxlength="15">
                     
                     <div class="token-selection">
                         ${CONSTANTS.TOKENS.map(t => {
                             const isSelected = t.id === availableToken.id;
-                            const isUsed = usedTokens.has(t.id) && !isSelected;
+                            const isUsed = this.isTokenUsed(t.id, i);
                             return `
                                 <div class="token-option ${isSelected ? 'selected' : ''} ${isUsed ? 'used' : ''}" 
                                      data-token="${t.id}"
@@ -202,6 +167,22 @@ class LobbyManager {
         return html;
     }
 
+    // Verificar si un token está usado por otro jugador
+    isTokenUsed(tokenId, currentIndex) {
+        // Para saber si está usado, necesitamos ver los tokens seleccionados en otras filas
+        const allTokenOptions = document.querySelectorAll('.token-option.selected');
+        for (const option of allTokenOptions) {
+            const row = option.closest('.player-input-row');
+            if (row) {
+                const index = parseInt(row.dataset.index);
+                if (index !== currentIndex && option.dataset.token === tokenId) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Configurar event listeners
     setupEventListeners() {
         // Selección de modo
@@ -212,27 +193,27 @@ class LobbyManager {
                 this.renderLobby();
             }
 
-            // Botones de cantidad
-            const countBtn = e.target.closest('.count-btn');
-            if (countBtn) {
-                this.playerCount = parseInt(countBtn.dataset.count);
-                this.renderLobby();
-            }
-
             // Tokens
             const tokenOption = e.target.closest('.token-option');
             if (tokenOption && !tokenOption.classList.contains('used')) {
                 const row = tokenOption.closest('.player-input-row');
                 const index = parseInt(row.dataset.index);
-                const oldToken = row.querySelector('.token-option.selected');
                 
-                if (oldToken) {
-                    oldToken.classList.remove('selected');
-                    this.selectedTokens.delete(oldToken.dataset.token);
-                }
+                // Guardar el token actual seleccionado
+                const currentToken = tokenOption.dataset.token;
                 
+                // Deseleccionar todos los tokens en esta fila
+                const allTokensInRow = row.querySelectorAll('.token-option');
+                allTokensInRow.forEach(t => t.classList.remove('selected'));
+                
+                // Seleccionar el nuevo token
                 tokenOption.classList.add('selected');
-                this.selectedTokens.add(tokenOption.dataset.token);
+                
+                // Actualizar la lista de tokens seleccionados
+                this.updateSelectedTokens();
+                
+                // Forzar re-render para actualizar los estados "used"
+                this.updateTokenStates();
             }
 
             // Eliminar jugador
@@ -240,6 +221,11 @@ class LobbyManager {
             if (removeBtn) {
                 const index = parseInt(removeBtn.dataset.index);
                 this.removePlayer(index);
+            }
+
+            // Agregar jugador humano
+            if (e.target.id === 'add-player' || e.target.closest('#add-player')) {
+                this.addHumanPlayer();
             }
 
             // Agregar bot
@@ -251,16 +237,6 @@ class LobbyManager {
             if (e.target.id === 'start-game' || e.target.closest('#start-game')) {
                 this.startGame();
             }
-
-            // Crear sala
-            if (e.target.id === 'create-room' || e.target.closest('#create-room')) {
-                this.showCreateRoom();
-            }
-
-            // Unirse a sala
-            if (e.target.id === 'join-room' || e.target.closest('#join-room')) {
-                this.showJoinRoom();
-            }
         });
 
         // Input de nombres
@@ -271,20 +247,49 @@ class LobbyManager {
         });
     }
 
-    // Actualizar contador de jugadores
-    updatePlayerCount() {
-        const inputs = document.querySelectorAll('.player-name-input');
-        const filledCount = Array.from(inputs).filter(input => input.value.trim()).length;
+    // Actualizar lista de tokens seleccionados
+    updateSelectedTokens() {
+        this.selectedTokens.clear();
+        const selectedOptions = document.querySelectorAll('.token-option.selected');
+        selectedOptions.forEach(option => {
+            this.selectedTokens.add(option.dataset.token);
+        });
+    }
+
+    // Actualizar estados de tokens
+    updateTokenStates() {
+        const allTokenOptions = document.querySelectorAll('.token-option');
+        const selectedTokens = Array.from(document.querySelectorAll('.token-option.selected'))
+            .map(opt => opt.dataset.token);
         
-        const countElement = document.getElementById('player-count');
-        if (countElement) {
-            countElement.textContent = filledCount;
+        allTokenOptions.forEach(option => {
+            const tokenId = option.dataset.token;
+            const isSelected = option.classList.contains('selected');
+            
+            // Si el token está seleccionado en otra fila y no es el actual, marcarlo como usado
+            if (selectedTokens.includes(tokenId) && !isSelected) {
+                option.classList.add('used');
+            } else {
+                option.classList.remove('used');
+            }
+        });
+    }
+
+    // Agregar jugador humano
+    addHumanPlayer() {
+        if (this.playerCount >= CONSTANTS.DEFAULT_CONFIG.maxPlayers) {
+            alert(`Máximo ${CONSTANTS.DEFAULT_CONFIG.maxPlayers} jugadores permitidos`);
+            return;
         }
+
+        this.playerCount++;
+        this.renderLobby();
         
-        // Actualizar estado del botón de agregar bot
-        const addBotBtn = document.getElementById('add-bot');
-        if (addBotBtn) {
-            addBotBtn.disabled = this.playerCount >= CONSTANTS.DEFAULT_CONFIG.maxPlayers;
+        // Establecer nombre del nuevo jugador
+        const lastInput = document.querySelector('.player-input-row:last-child .player-name-input');
+        if (lastInput) {
+            lastInput.value = `Jugador ${this.playerCount}`;
+            this.updatePlayerCount();
         }
     }
 
@@ -336,6 +341,28 @@ class LobbyManager {
         this.renderLobby();
     }
 
+    // Actualizar contador de jugadores
+    updatePlayerCount() {
+        const inputs = document.querySelectorAll('.player-name-input');
+        const filledCount = Array.from(inputs).filter(input => input.value.trim()).length;
+        
+        const countElement = document.getElementById('player-count');
+        if (countElement) {
+            countElement.textContent = filledCount;
+        }
+        
+        // Actualizar estado de los botones
+        const addPlayerBtn = document.getElementById('add-player');
+        const addBotBtn = document.getElementById('add-bot');
+        
+        if (addPlayerBtn) {
+            addPlayerBtn.disabled = this.playerCount >= CONSTANTS.DEFAULT_CONFIG.maxPlayers;
+        }
+        if (addBotBtn) {
+            addBotBtn.disabled = this.playerCount >= CONSTANTS.DEFAULT_CONFIG.maxPlayers;
+        }
+    }
+
     // Iniciar juego
     startGame() {
         // Recoger datos de jugadores
@@ -346,7 +373,10 @@ class LobbyManager {
             const nameInput = row.querySelector('.player-name-input');
             const tokenOption = row.querySelector('.token-option.selected');
             
-            if (!nameInput || !tokenOption) continue;
+            if (!nameInput || !tokenOption) {
+                alert('Todos los jugadores deben seleccionar un token');
+                return;
+            }
             
             const name = nameInput.value.trim();
             if (!name) {
@@ -378,16 +408,6 @@ class LobbyManager {
         
         // Cambiar a pantalla de juego
         window.uiManager.showGameScreen(this.players);
-    }
-
-    // Mostrar crear sala (placeholder)
-    showCreateRoom() {
-        alert('Funcionalidad de crear sala en desarrollo');
-    }
-
-    // Mostrar unirse a sala (placeholder)
-    showJoinRoom() {
-        alert('Funcionalidad de unirse a sala en desarrollo');
     }
 }
 
